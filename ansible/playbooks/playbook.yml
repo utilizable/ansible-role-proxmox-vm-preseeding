@@ -3,6 +3,35 @@
 - name: playbook 
   hosts: target 
 
-#  roles:
-#    - role: utilizable-proxmox-vm-preseeding
+  roles:
+    - role: ansible-role-proxmox-vm-preseeding
+
+      # required configuration 
+      # (auth; target; etc.)
+      # ######################
+
+      required:
+        target: 
+          vm_node: anykey
+          vm_id: 999 
+        options:
+          release: bookworm  
+
+      # Seed configuration
+      # ######################
+
+      configuration:
+        account:
+          password_root: 9311540
+        location:
+          locale: en_US
+        network:
+          ip_address: 192.168.1.24 
+          netmask: 255.255.255.0 
+          gateway: 192.168.1.1 
+            # domain: domain.com
+          nameserver: 9.9.9.9
+        additional_packages:
+          - qemu-guest-agent
+          - lxd
 ...

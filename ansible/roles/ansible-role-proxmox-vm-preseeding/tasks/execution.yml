@@ -1,0 +1,37 @@
+#!/usr/bin/env ansible-playbook
+
+- name: Stop virtual machine instance
+  command: >
+    pvesh create /nodes/{{ required.target.vm_node }}/qemu/{{ required.target.vm_id }}/status/stop
+
+- name: Prepare kvm arguments 
+  set_fact:
+    arguments: "{{ lookup('template', defaults.deploy_args_template) | regex_replace('#.*', '') | replace('\n', ' ') }}"
+
+- name: Update virtual machine instance kvm arguments
+  command: >
+    pvesh set /nodes/{{ required.target.vm_node }}/qemu/{{ required.target.vm_id }}/config --args '{{ arguments }}'
+
+- meta: flush_handlers
+
+- name: Star virtual machine instance 
+  command: >
+    pvesh create /nodes/{{ required.target.vm_node }}/qemu/{{ required.target.vm_id }}/status/start
+
+- meta: flush_handlers
+    
+- name: Flush virtual machine kvm arguments 
+  command: >
+    pvesh set /nodes/{{ required.target.vm_node }}/qemu/{{ required.target.vm_id }}/config --args ''
+
+- name: Wait for virtual machines to finish installation
+  command: >
+    pvesh get /nodes/{{ required.target.vm_node }}/qemu/{{ required.target.vm_id }}/status/current --output-format=json
+  register: state 
+  until: state.stdout | from_json | json_query('status') == "stopped" 
+  retries: 60
+  delay: 20
+
+- name: Reboot virtual machine instance 
+  command: >
+    pvesh create /nodes/{{ required.target.vm_node }}/qemu/{{ required.target.vm_id }}/status/start

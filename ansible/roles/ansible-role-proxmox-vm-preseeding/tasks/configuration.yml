@@ -1,0 +1,46 @@
+#!/usr/bin/env ansible-playbook
+
+- name: Create temporary directory for netboot image
+  file:
+    path: /tmp/{{ required.options.release }}
+    state: directory
+    mode: 0755
+
+- name: Download and unpack netboot image
+  unarchive:
+    src: "https://deb.debian.org/debian/dists/{{ required.options.release }}/\
+          main/installer-amd64/current/images/netboot/netboot.tar.gz"
+    dest: /tmp/{{ required.options.release }}
+    remote_src: yes
+
+- name: Move linux kernel file
+  copy:
+    src: /tmp/{{ required.options.release }}/debian-installer/amd64/linux
+    dest: /tmp/{{ required.options.release }}-kernel
+    remote_src: yes
+
+- name: Create temporary directory for initrd
+  file:
+    path: /tmp/{{ required.options.release }}/{{ required.target.vm_id }}-initrd
+    state: directory
+    mode: 0755
+
+- name: Unpack initrd
+  shell: zcat /tmp/{{ required.options.release }}/debian-installer/amd64/initrd.gz | cpio -id
+  args:
+    chdir: /tmp/{{ required.options.release }}/{{ required.target.vm_id }}-initrd
+
+- name: Copy preseed file
+  copy:
+    src: "files/{{ defaults.preseed_template }}"
+    dest: /tmp/{{ required.options.release }}/{{ required.target.vm_id }}-initrd/preseed.cfg
+
+- name: Copy post installation script
+  template:
+    src: templates/finalization.sh.j2
+    dest: /tmp/{{ required.options.release }}/{{ required.target.vm_id }}-initrd/finalization
+
+- name: Repack initrd
+  shell: find . | cpio --create --format='newc' | gzip > /tmp/{{ required.target.vm_id }}-initrd.gz
+  args:
+    chdir: /tmp/{{ required.options.release }}/{{ required.target.vm_id }}-initrd

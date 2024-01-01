@@ -1,0 +1,182 @@
+################################################################################
+# Script Name: bookworm.seed 
+# Description: Debian preseed static configuration 
+# Orgin:       https://preseed.debian.net/debian-preseed/bullseye/amd64-main-full.txt
+################################################################################
+
+############################
+#### cdebconf-udeb_0.270_amd64.udeb
+############################
+
+### Description: Ignore questions with a priority less than:
+#   Packages that use debconf for configuration prioritize the questions they
+#   might ask you. Only questions with a certain priority or higher are
+#   actually shown to you; all less important questions are skipped.
+#   .
+#   You can select the lowest priority of question you want to see:
+#    - 'critical' is for items that will probably break the system
+#       without user intervention.
+#    - 'high' is for items that don't have reasonable defaults.
+#    - 'medium' is for normal items that have reasonable defaults.
+#    - 'low' is for trivial items that have defaults that will work in
+#      the vast majority of cases.
+#   .
+#   For example, this question is of medium priority, and if your priority
+#   were already 'high' or 'critical', you wouldn't see this question.
+
+d-i debconf/priority select critical 
+
+# Possible choices: critical, high, medium, low
+
+############################
+#### tzsetup-udeb_0.122_all.udeb
+############################
+
+### Description: ${DESCRIPTION}
+#   If the desired time zone is not listed, then please go back to the step
+#   "Choose language" and select a country that uses the desired time zone
+#   (the country where you live or are located).
+
+d-i time/zone select Europe/Berlin 
+
+############################
+#### partman-auto_162_amd64.udeb
+############################
+
+### Description: for internal use; can be preseeded
+#   Method to use for partitioning
+
+d-i partman-auto/method string regular 
+
+############################
+#### partman-partitioning_147_amd64.udeb
+############################
+
+### Description: Write a new empty partition table?
+#   Because of limitations in the current implementation of the Sun
+#   partition tables in libparted, the newly created partition table has
+#   to be written to the disk immediately.
+#   .
+#   You will NOT be able to undo this operation later and all existing
+#   data on the disk will be irreversibly removed.
+#   .
+#   Confirm whether you actually want to create a new partition table and
+#   write it to disk.
+
+d-i partman-partitioning/confirm_write_new_label boolean true 
+
+##############################
+#### partman-base_226_amd64.udeb
+############################
+
+### Description: This is an overview of your currently configured 
+#   partitions and mount points. Select a partition to modify its 
+#   settings (file system, mount point, etc.), a free space to create 
+#   partitions, or a device to initialize its partition table.
+
+d-i partman/choose_partition select finish 
+
+# Possible choices: ${DESCRIPTIONS}
+
+############################
+#### partman-base_226_amd64.udeb
+############################
+
+### Description: Write the changes to disks?
+#   If you continue, the changes listed below will be written to the disks.
+#   Otherwise, you will be able to make further changes manually.
+#   .
+#   WARNING: This will destroy all data on any partitions you have
+#   removed as well as on the partitions that are going to be formatted.
+#   .
+#   ${ITEMS}
+
+d-i partman/confirm boolean true 
+
+### Description: Write the changes to disks?
+#   If you continue, the changes listed below will be written to the disks.
+#   Otherwise, you will be able to make further changes manually.
+#   .
+#   ${ITEMS}
+
+d-i partman/confirm_nooverwrite boolean true 
+
+############################
+#### user-setup-udeb_1.95_all.udeb
+############################
+
+d-i passwd/make-user boolean false 
+
+############################
+#### rootskel_1.136_amd64.udeb
+############################
+
+### Description: for internal use; can be preseeded
+#   Power off the machine
+
+d-i debian-installer/exit/poweroff boolean false
+
+############################
+#### preseed-common_1.117_all.udeb
+############################
+
+### Description: for internal use; can be preseeded
+#   Shell command or commands to run in the d-i environment as late as possible
+
+d-i preseed/late_command string \
+  cp /finalization /target/; \
+  in-target /bin/bash /finalization
+
+############################
+#### file-preseed_1.117_all.udeb
+############################
+
+### Description: for internal use; can be preseeded
+#   Path to debconf preconfiguration file (or files) to load
+
+d-i preseed/file string /preseed.cfg 
+
+############################
+#### netcfg-static_1.187_amd64.udeb
+############################
+
+### Description: Domain name:
+#   The domain name is the part of your Internet address to the right of your
+#   host name.  It is often something that ends in .com, .net, .edu, or .org. 
+#   If you are setting up a home network, you can make something up, but make
+#   sure you use the same domain name on all your computers.
+
+d-i netcfg/get_domain string localhost 
+
+############################
+#### tasksel_3.73_all.deb
+############################
+
+### Description: Choose software to install:
+#   At the moment, only the core of the system is installed. To tune the
+#   system to your needs, you can choose to install one or more of the
+#   following predefined collections of software.
+
+tasksel tasksel/first multiselect standard,ssh-server
+
+############################
+#### cdrom-detect_1.106_all.udeb
+############################
+
+### Description: for internal use; can be preseeded
+#   Set to false to prevent the system from ejecting the CD-ROM before rebooting
+
+d-i cdrom-detect/eject boolean true
+
+### Description: avoid that last message about the install being complete.
+#
+d-i finish-install/reboot_in_progress note
+
+############################
+#### rootskel_1.136_amd64.udeb
+############################
+
+### Description: for internal use; can be preseeded
+#   Power off the machine
+
+d-i debian-installer/exit/poweroff boolean true 

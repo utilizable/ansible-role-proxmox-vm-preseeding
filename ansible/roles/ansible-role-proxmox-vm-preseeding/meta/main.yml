@@ -1,0 +1,19 @@
+galaxy_info:
+  role_name: proxmox_vms_preseeding
+  author: utilizable 
+  description: Append preseed configuration to proxmox debian virtual machine. 
+
+  license: "license (BSD, MIT)"
+
+  min_ansible_version: 2.6.4
+
+  platforms:
+    - name: Debian
+      versions:
+        - all
+
+  galaxy_tags:
+    - proxmox
+    - debian 
+    - virtual-machine
+    - preseed

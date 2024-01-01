@@ -19,5 +19,5 @@ default:
 install:
 	$(CMD_COMPOSE) up --build install 
 
-play: install
+play:
 	$(CMD_COMPOSE) up --build play 

@@ -1,0 +1,61 @@
+#!/usr/bin/env ansible-playbook
+--- 
+# -------------------------
+# FILES 
+# -------------------------
+
+# check preseed file existance
+# -------------------------
+- name: Check if seed file exists
+  stat:
+    path: "{{ role_path }}/files/{{ required.options.release }}.seed"
+  delegate_to: localhost
+  become: false
+  with_dict: "{{ required }}"
+  register: seed_file
+
+- name: Exit if seed file does not exists
+  fail:
+    msg: "Seed file does not exist for given configuration {{ item.item.key }}"
+  when: not item.stat.exists
+  with_items: "{{ seed_file.results }}"
+
+# check template file existance
+# -------------------------
+- name: Check if template file exists
+  stat:
+    path: "{{ role_path }}/templates/{{ required.options.release }}.seed.j2"
+  delegate_to: localhost
+  become: false
+  with_dict: "{{ required }}"
+  register: template_file
+
+- name: Exit if template file does not exists
+  fail:
+    msg: "Template file does not exist for givne configuration {{ item.item.key }}"
+  when: not item.stat.exists
+  with_items: "{{ template_file.results }}"
+
+# -------------------------
+# VARIABLES 
+# -------------------------
+
+# ceck target
+# -------------------------
+- name: Fail if vm 'vm_id' is undefined
+  fail:
+    msg: "The 'vm_id' attribute is not defined for configuration key '{{ required.target.vm_id }}'"
+  when: required.target.vm_id is undefined and required.target.vm_name is undefined
+
+- name: Fail if proxmox node 'vm_node' is undefined
+  fail:
+    msg: "The 'vm_node' attribute is not defined for configuration key '{{ required.target.vm_node }}'"
+  when: required.target.vm_node is undefined
+
+# options 
+# -------------------------
+- name: Fail if release 'release' is undefined
+  fail:
+    msg: "The 'release' attribute is not defined for options"
+  when: required.options.release is undefined 
+...

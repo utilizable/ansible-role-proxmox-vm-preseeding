@@ -1,0 +1,188 @@
+################################################################################
+#  Script Name:    bookworm.seed.j2
+#  Description:    Debian preseed template configuration 
+################################################################################
+
+############################
+#### localechooser_2.103_amd64.udeb
+############################
+
+### Description: for internal use only
+
+debian-installer/language={{ configuration.location.locale[0:2] }}
+
+### Description: for internal use; can be preseeded 
+
+debian-installer/country={{ configuration.location.locale[-2:] }}
+
+### Description: Select the default locale for the installed system. 
+
+debian-installer/locale={{ configuration.location.locale }}
+
+############################
+#### keyboard-configuration_1.221_all.deb
+############################
+
+### Description: Keymap to use:
+keyboard-configuration/xkb-keymap={{ configuration.location.locale[-2:] }} 
+
+############################
+#### user-setup-udeb_1.95_all.udeb
+############################
+
+### Description: Root password:
+#   You need to set a password for 'root', the system administrative
+#   account. A malicious or unqualified user with root access can have
+#   disastrous results, so you should take care to choose a root password
+#   that is not easy to guess. It should not be a word found in dictionaries,
+#   or a word that could be easily associated with you.
+#   .
+#   A good password will contain a mixture of letters, numbers and punctuation
+#   and should be changed at regular intervals.
+#   .
+#   The root user should not have an empty password. If you leave this
+#   empty, the root account will be disabled and the system's initial user
+#   account will be given the power to become root using the "sudo"
+#   command.
+#   .
+#   Note that you will not be able to see the password as you type it.
+
+passwd/root-password={{ configuration.account.password_root }} 
+
+### Description: Re-enter password to verify:
+#   Please enter the same root password again to verify that you have typed it
+#   correctly.
+
+passwd/root-password-again={{ configuration.account.password_root }} 
+
+############################
+#### netcfg_1.187_amd64.udeb
+############################
+
+{% if configuration.network is defined %}
+
+{% 
+if  configuration.network.dhcp is defined 
+and configuration.network.dhcp == true
+%}
+
+### Description: Primary network interface:
+#   Your system has multiple network interfaces. Choose the one to use as
+#   the primary network interface during the installation. If possible, the
+#   first connected network interface found has been selected.
+
+netcfg/choose_interface=auto
+
+### Description: Auto-configuration networking?
+#   Networking can be configurationd either by entering all the information
+#   manually, or by using DHCP (or a variety of IPv6-specific methods) to
+#   detect network settings automatically. If you choose to use
+#   autoconfiguration and the installer is unable to get a working
+#   configuration from the network, you will be given the opportunity to
+#   configuration the network manually.
+
+netcfg/use_autoconfig=true
+
+### Description: Waiting time (in seconds) for link detection:
+#   Please enter the maximum time you would like to wait for network link
+#   detection.
+
+netcfg/link_wait_timeout=60
+
+### Description: for internal use; can be preseeded
+#   Timeout for trying DHCP
+
+netcfg/dhcp_timeout=25
+
+{% endif %} # dhcp
+
+{% 
+if    configuration.network.ip_address is defined 
+and   configuration.network.netmask    is defined 
+and   configuration.network.gateway    is defined 
+%}
+
+### Description: IP address:
+#   The IP address is unique to your computer and may be:
+#   .
+#    * four numbers separated by periods (IPv4);
+#    * blocks of hexadecimal characters separated by colons (IPv6).
+#   .
+#   You can also optionally append a CIDR netmask (such as "/24").
+#   .
+#   If you don't know what to use here, consult your network administrator.
+
+netcfg/get_ipaddress={{ configuration.network.ip_address }}
+
+### Description: Netmask:
+#   The netmask is used to determine which machines are local to your
+#   network.  Consult your network administrator if you do not know the
+#   value.  The netmask should be entered as four numbers separated by
+#   periods.
+
+netcfg/get_netmask={{ configuration.network.netmask }}
+
+### Description: Name server addresses:
+#   The name servers are used to look up host names on the network.
+#   Please enter the IP addresses (not host names) of up to 3 name servers,
+#   separated by spaces. Do not use commas. The first name server in the list
+#   will be the first to be queried. If you don't want to use any name server,
+#   just leave this field blank.
+
+netcfg/get_nameservers={{ configuration.network.nameserver }}
+
+### Description: Gateway:
+#   The gateway is an IP address (four numbers separated by periods) that
+#   indicates the gateway router, also known as the default router.  All
+#   traffic that goes outside your LAN (for instance, to the Internet) is
+#   sent through this router.  In rare circumstances, you may have no
+#   router; in that case, you can leave this blank.  If you don't know
+#   the proper answer to this question, consult your network
+#   administrator.
+
+netcfg/get_gateway={{ configuration.network.gateway }}
+
+### Description: Is this information correct?
+#   Currently configured network parameters:
+#   .
+#    interface     = ${interface}
+#    ipaddress     = ${ipaddress}
+#    netmask       = ${netmask}
+#    gateway       = ${gateway}
+#    pointopoint   = ${pointopoint}
+#    nameservers   = ${nameservers}
+
+netcfg/confirm_static=true
+
+### Description: for internal use; can be preseeded (deprecated)
+#   Set to true to force static network configuration (deprecated)
+netcfg/disable_dhcp=true
+
+{% endif %} # static
+
+{% if configuration.network.domain is defined %}
+
+### Description: Domain name:
+#   The domain name is the part of your Internet address to the right of your
+#   host name.  It is often something that ends in .com, .net, .edu, or .org. 
+#   If you are setting up a home network, you can make something up, but make
+#   sure you use the same domain name on all your computers.
+
+netcfg/get_domain={{ configuration.network.domain }}
+
+{% endif %}
+
+{% if configuration.network.domain is defined %}
+
+### Description: Hostname:
+#   Please enter the hostname for this system.
+#   .
+#   The hostname is a single word that identifies your system to the network.
+#   If you don't know what your hostname should be, consult your network
+#   administrator. If you are setting up your own home network, you can make
+#   something up here.
+d-i netcfg/get_hostname={{ configuration.network.hostname }} 
+
+{% endif %}
+
+{% endif %} #netcfg

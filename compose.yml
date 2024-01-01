@@ -12,30 +12,27 @@ services:
     env_file:
       - .env
 
+# - install ansible roles ;
   install:
     <<: *common
     container_name: "ansible-install"
     command:
       - |
-        # install ansible roles 
-        # -
         ansible-galaxy \
         install \
         -r \
         requirements.yml
 
+# - append private key to ssh client;
+# - evaluate ansible playbook;
   play:
     <<: *common
     container_name: "ansible-playbook"
     command:
       - |
-        # append private key to ssh client 
-        # -
         eval $(ssh-agent); 
         ssh-add - <<< "${TARGET_ID_RSA}";
 
-        # evaluate ansible playbook
-        # -
         ansible-playbook \
         ./playbooks/playbook.yml \
         --inventory \

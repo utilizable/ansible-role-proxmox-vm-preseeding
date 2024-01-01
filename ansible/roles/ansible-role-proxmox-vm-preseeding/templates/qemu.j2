@@ -1,0 +1,29 @@
+{#
+  Script Name:    qemu.j2
+  Description:    Qemu arguments template configuration 
+}#
+
+{# ############################ #}
+
+{%- macro delete_comments(content) -%}
+  {{ content | reject('match', '^\\s*#') | join('\n') }}
+{%- endmacro -%}
+
+{% macro delete_spaces(content) -%}
+    {{ content | regex_replace('\s+', ' ') }}
+{% endmacro %}
+
+{# ############################ #}
+
+{% set preseed_file = '{{ defaults.preseed_template }}.j2' -%}
+
+{# ############################ #}
+
+{# Description: Specify the kernel image #}
+-kernel /tmp/{{ required.options.release}}-kernel
+
+{# Description: Specify the location of the initial ramdisk #}
+-initrd /tmp/{{ required.target.vm_id }}-initrd.gz
+
+{# Description: Specify additional kernel parameters #}
+-append "{{ delete_spaces(delete_comments(lookup('template', preseed_file).splitlines())) }}"

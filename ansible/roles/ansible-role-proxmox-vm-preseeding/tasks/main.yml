@@ -1,0 +1,13 @@
+#!/usr/bin/env ansible-playbook
+    
+- name: Validate
+  import_tasks: './validation.yml'
+
+- name: Prepare configuration
+  import_tasks: './configuration.yml'
+
+- name: Execute changes
+  import_tasks: './execution.yml'
+    
+- name: Cleanup
+  import_tasks: './cleanup.yml'
