@@ -1,3 +1,3 @@
-Devel ANSIBLE
+Ansible Role - PROXMOX VM PRESEEDING
 ============
-This repository serves as a template for Ansible projects, enhanced with a Makefile and Docker Compose for streamlined setup and usage.
+This repository contains Ansible role to create VM (debian) and pass to it pre-definied seed file.
